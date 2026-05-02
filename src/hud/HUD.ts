@@ -428,8 +428,6 @@ export class HUD {
     const status = document.createElement("button");
     status.className = "mobile-status";
     status.addEventListener("click", () => {
-      this.mobileInfoExpanded = true;
-      this.syncExpansion();
       this.setMobilePanel("info");
     });
     const statusLabel = document.createElement("span");
@@ -666,6 +664,10 @@ export class HUD {
         "mission-text-expanded",
         panel === "mission" && this.mobileMissionTextExpanded,
       );
+      if (open) {
+        const body = this.el.mobileSheet.querySelector<HTMLElement>(".mobile-sheet-body");
+        if (body) body.scrollTop = 0;
+      }
     }
     if (this.el.mobileSheetTitle) {
       this.el.mobileSheetTitle.textContent = panel ? panel.toUpperCase() : "";
