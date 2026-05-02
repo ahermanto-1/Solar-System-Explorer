@@ -2,7 +2,9 @@ import type { SimState } from "../state/SimState";
 import type { SolarSystem } from "../scene/SolarSystem";
 import { BODIES, getBody } from "../data/bodies";
 import { FEATURES, nearbyFeatures } from "../data/features";
-import { APOLLO_11_MISSION, activeMissionStep, getMission, type Mission } from "../data/missions";
+import { MISSIONS, activeMissionStep, getMission, type Mission } from "../data/missions";
+import { bodyPosition } from "../scene/OrbitMath";
+import { scalePosition } from "../scene/Scaling";
 import { fmtKm, fmtMass, fmtMet, fmtSpeed, fmtUtc, fmtVelocity } from "./format";
 import { Sparkline } from "./Sparkline";
 
@@ -548,7 +550,8 @@ export class HUD {
     mini.appendChild(c);
     this.el.miniCanvases.push(c);
 
-    const list = panel("mobile-bodies-card");
+    const list = document.createElement("div");
+    list.className = "mobile-bodies-section";
     list.appendChild(panelHeader("BODIES", "TAP TO FOCUS"));
     const search = document.createElement("input");
     search.className = "mobile-body-search";
@@ -599,11 +602,6 @@ export class HUD {
       meta.textContent = b.kind === "moon" ? `MOON · ${getBody(b.parent!)?.name}` : b.kind.toUpperCase();
       item.append(name, meta);
       item.addEventListener("click", () => {
-        if (b.id === "sun") {
-          (window as any).__overview?.();
-          if (closeOnFocus) this.setMobilePanel(null);
-          return;
-        }
         const body = this.system.bodyAt(b.id);
         if (body) {
           (window as any).__rig?.focus(body);
@@ -797,8 +795,8 @@ export class HUD {
     if (!this.state.activeFeatureId) return;
     const f = FEATURES.find((x) => x.name === this.state.activeFeatureId);
     if (!f) return;
-    const rich = f.bodyId === "moon";
     const typeClass = f.type.replace(/\s+/g, "-");
+    const nearby = nearbyFeatures(f, 3);
 
     const card = document.createElement("div");
     card.className = `feature-card feature-card--${typeClass}`;
@@ -830,7 +828,7 @@ export class HUD {
     const head = document.createElement("div");
     const tag = document.createElement("div");
     tag.className = "fc-tag";
-    tag.textContent = rich ? f.type.toUpperCase() : "SURFACE FEATURE";
+    tag.textContent = f.type.toUpperCase();
     const name = document.createElement("div");
     name.className = "fc-name";
     name.textContent = f.name;
@@ -859,26 +857,23 @@ export class HUD {
       card.appendChild(expanded);
     }
 
-    if (rich) {
-      const nearby = nearbyFeatures(f, 3);
-      if (nearby.length) {
-        const wrap = document.createElement("div");
-        wrap.className = "fc-nearby";
-        const nearbyTitle = document.createElement("div");
-        nearbyTitle.className = "fc-section-title";
-        nearbyTitle.textContent = "NEARBY FEATURES";
-        const list = document.createElement("div");
-        list.className = "fc-nearby-list";
-        for (const item of nearby) {
-          const option = btn(item.name);
-          option.className = `fc-nearby-item fc-nearby-item--${item.type.replace(/\s+/g, "-")}`;
-          option.title = `${item.type} · ${formatCoords(item.lat, item.lon)}`;
-          option.addEventListener("click", () => this.state.setActiveFeature(item.name));
-          list.appendChild(option);
-        }
-        wrap.append(nearbyTitle, list);
-        card.appendChild(wrap);
+    if (nearby.length) {
+      const wrap = document.createElement("div");
+      wrap.className = "fc-nearby";
+      const nearbyTitle = document.createElement("div");
+      nearbyTitle.className = "fc-section-title";
+      nearbyTitle.textContent = "NEARBY FEATURES";
+      const list = document.createElement("div");
+      list.className = "fc-nearby-list";
+      for (const item of nearby) {
+        const option = btn(item.name);
+        option.className = `fc-nearby-item fc-nearby-item--${item.type.replace(/\s+/g, "-")}`;
+        option.title = `${item.type} · ${formatCoords(item.lat, item.lon)}`;
+        option.addEventListener("click", () => this.state.setActiveFeature(item.name));
+        list.appendChild(option);
       }
+      wrap.append(nearbyTitle, list);
+      card.appendChild(wrap);
     }
 
     this.root.appendChild(card);
@@ -907,20 +902,25 @@ export class HUD {
     target.appendChild(header);
 
     if (!mission) {
-      const title = document.createElement("div");
-      title.className = "mission-title";
-      title.textContent = APOLLO_11_MISSION.title;
-      const subtitle = document.createElement("div");
-      subtitle.className = "mission-subtitle";
-      subtitle.textContent = APOLLO_11_MISSION.summary;
-      const start = btn("Begin Mission");
-      start.className = "mission-primary";
-      start.addEventListener("click", () => {
-        this.missionPanelOpen = true;
-        this.mobileMissionTextExpanded = false;
-        this.state.startMission(APOLLO_11_MISSION.id);
-      });
-      target.append(title, subtitle, start);
+      for (const item of MISSIONS) {
+        const choice = document.createElement("div");
+        choice.className = "mission-choice";
+        const title = document.createElement("div");
+        title.className = "mission-title";
+        title.textContent = item.title;
+        const subtitle = document.createElement("div");
+        subtitle.className = "mission-subtitle";
+        subtitle.textContent = item.summary;
+        const start = btn(`Begin ${item.subtitle}`);
+        start.className = "mission-primary";
+        start.addEventListener("click", () => {
+          this.missionPanelOpen = true;
+          this.mobileMissionTextExpanded = false;
+          this.state.startMission(item.id);
+        });
+        choice.append(title, subtitle, start);
+        target.appendChild(choice);
+      }
       return;
     }
 
@@ -1065,6 +1065,11 @@ export class HUD {
     ctx.fillStyle = "rgba(0, 0, 0, 0.28)";
     ctx.fillRect(0, 0, w, h);
 
+    if (step?.routeBodyIds?.length && (step.pathMode === "grand-tour" || step.pathMode === "interstellar" || step.pathMode === "outer-flyby")) {
+      this.drawGrandTourMissionMinimap(ctx, w, h, mission, step);
+      return;
+    }
+
     const earth = { x: 76, y: h * 0.58 };
     const moon = { x: w - 72, y: h * 0.42 };
     const t = step ? lerp(step.markerStartT, step.markerT, this.state.mission.stepProgress) : 0;
@@ -1113,6 +1118,109 @@ export class HUD {
       ctx.arc(marker.x, marker.y, 11, 0, Math.PI * 2);
       ctx.stroke();
     }
+  }
+
+  private drawGrandTourMissionMinimap(
+    ctx: CanvasRenderingContext2D,
+    w: number,
+    h: number,
+    mission: Mission | null,
+    step: NonNullable<ReturnType<typeof activeMissionStep>>,
+  ) {
+    const sun = this.system.bodyAt("sun")?.group.position;
+    const bodies = (step.routeBodyIds ?? [])
+      .map((id) => {
+        const body = this.system.bodyAt(id);
+        if (!body) return null;
+        const routePoint = missionRouteScenePoint(id, mission, this.state.toggles) ?? body.group.position;
+        return {
+          id,
+          name: body.data.name,
+          color: cssHex(body.data.color),
+          x: routePoint.x,
+          y: routePoint.z,
+        };
+      })
+      .filter((body): body is { id: string; name: string; color: string; x: number; y: number } => !!body);
+
+    if (!bodies.length) return;
+
+    const route = bodies.map((body) => ({ x: body.x, y: body.y }));
+    if (step.pathMode === "interstellar") {
+      const last = route[route.length - 1];
+      const sx = sun?.x ?? 0;
+      const sy = sun?.z ?? 0;
+      const dx = last.x - sx;
+      const dy = last.y - sy;
+      const len = Math.hypot(dx, dy) || 1;
+      route.push({
+        x: last.x + (dx / len) * Math.max(12, len * 0.34),
+        y: last.y + (dy / len) * Math.max(12, len * 0.34),
+      });
+    }
+
+    const xs = route.map((point) => point.x).concat(0);
+    const ys = route.map((point) => point.y).concat(0);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const spanX = Math.max(1, maxX - minX);
+    const spanY = Math.max(1, maxY - minY);
+    const scale = Math.min((w - 54) / spanX, (h - 34) / spanY);
+    const project = (point: { x: number; y: number }) => ({
+      x: (w - spanX * scale) / 2 + (point.x - minX) * scale,
+      y: (h - spanY * scale) / 2 + (point.y - minY) * scale,
+    });
+
+    const projectedRoute = route.map(project);
+    const markerT = lerp(step.markerStartT, step.markerT, this.state.mission.stepProgress);
+    const marker = pointOnMiniPolyline(projectedRoute, markerT);
+    const solarCenter = project({ x: 0, y: 0 });
+
+    ctx.strokeStyle = "rgba(94, 231, 224, 0.12)";
+    ctx.lineWidth = 1;
+    const maxOrbit = Math.max(...route.map((point) => Math.hypot(point.x, point.y))) * scale;
+    for (let i = 1; i <= 3; i++) {
+      ctx.beginPath();
+      ctx.arc(solarCenter.x, solarCenter.y, maxOrbit * (i / 3), 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    ctx.strokeStyle = "rgba(245, 185, 66, 0.76)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    projectedRoute.forEach((point, index) => {
+      if (index === 0) ctx.moveTo(point.x, point.y);
+      else ctx.lineTo(point.x, point.y);
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffd27a";
+    ctx.beginPath();
+    ctx.arc(solarCenter.x, solarCenter.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font = "18px JetBrains Mono, monospace";
+    ctx.textBaseline = "middle";
+    for (const body of bodies) {
+      const point = project(body);
+      const active = body.id === step.focusId;
+      ctx.fillStyle = active ? "#ffffff" : body.color;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, active ? 5 : 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = active ? "#ffffff" : "#d8e3ec";
+      ctx.fillText(body.name, Math.min(w - 92, point.x + 8), Math.max(12, Math.min(h - 12, point.y - 9)));
+    }
+
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(marker.x, marker.y, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#f5b942";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(marker.x, marker.y, 11, 0, Math.PI * 2);
+    ctx.stroke();
   }
 
   private drawMinimap(c: HTMLCanvasElement) {
@@ -1281,5 +1389,60 @@ function pointOnMiniCurve(
   return {
     x: a.x + (b.x - a.x) * t,
     y: a.y + (b.y - a.y) * t,
+  };
+}
+
+function pointOnMiniPolyline(points: { x: number; y: number }[], t: number) {
+  if (points.length === 0) return { x: 0, y: 0 };
+  if (points.length === 1) return points[0];
+
+  const segments: number[] = [];
+  let total = 0;
+  for (let i = 1; i < points.length; i++) {
+    const length = Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+    segments.push(length);
+    total += length;
+  }
+
+  let target = Math.max(0, Math.min(1, t)) * total;
+  for (let i = 0; i < segments.length; i++) {
+    const length = segments[i];
+    if (target <= length || i === segments.length - 1) {
+      const localT = length > 0 ? target / length : 0;
+      return {
+        x: lerp(points[i].x, points[i + 1].x, localT),
+        y: lerp(points[i].y, points[i + 1].y, localT),
+      };
+    }
+    target -= length;
+  }
+
+  return points[points.length - 1];
+}
+
+function cssHex(value: number) {
+  return `#${value.toString(16).padStart(6, "0")}`;
+}
+
+function missionRouteScenePoint(bodyId: string, mission: Mission | null, scaleConfig: { trueScale: boolean }) {
+  const timestampUtc = mission?.steps.find((step) => step.focusId === bodyId)?.timestampUtc;
+  if (!timestampUtc) return null;
+  return bodyScenePointAt(bodyId, new Date(timestampUtc).getTime(), scaleConfig);
+}
+
+function bodyScenePointAt(bodyId: string, epochMs: number, scaleConfig: { trueScale: boolean }): { x: number; y: number; z: number } | null {
+  const body = getBody(bodyId);
+  if (!body) return null;
+  if (!body.parent) return { x: 0, y: 0, z: 0 };
+
+  const parent = getBody(body.parent) ?? null;
+  const parentPoint = parent ? bodyScenePointAt(parent.id, epochMs, scaleConfig) ?? { x: 0, y: 0, z: 0 } : { x: 0, y: 0, z: 0 };
+  const posKm = bodyPosition(body, epochMs);
+  const scaled = { x: 0, y: 0, z: 0 };
+  scalePosition(parent, posKm, scaleConfig, scaled);
+  return {
+    x: parentPoint.x + scaled.x,
+    y: parentPoint.y + scaled.y,
+    z: parentPoint.z + scaled.z,
   };
 }

@@ -25,6 +25,7 @@ const system = new SolarSystem();
 const rig = new CameraRig(canvas, window.innerWidth / window.innerHeight);
 const missionLayer = new MissionLayer(system);
 system.scene.add(missionLayer.group);
+const MISSION_CAMERA_TRANSITION_MS = 2200;
 
 // Initial scale + orbit lines
 system.applyScale(state.toggles);
@@ -135,7 +136,7 @@ function frame() {
   system.updateAll(state.simEpochMs, state.toggles);
   system.rotateAll(dtSec, state.playing ? state.speed : 0);
   missionLayer.update(state, rig.camera);
-  if (state.mission.activeId && rig.targetObject !== missionLayer.cameraTarget) {
+  if (state.mission.activeId && !rig.isFocusingObject(missionLayer.cameraTarget)) {
     rig.focusObject(missionLayer.cameraTarget, true, rig.distance);
   }
   rig.update(dtSec);
@@ -180,11 +181,13 @@ function applyMissionCamera() {
     missionLayer.update(state, rig.camera);
 
     const focus = system.bodyAt(step.focusId);
+    const sun = system.bodyAt("sun");
     const earth = system.bodyAt("earth");
     const moon = system.bodyAt("moon");
-    if (!focus || !earth || !moon) return;
+    if (!focus || !sun || !earth || !moon) return;
 
     const earthMoonSpan = earth.group.position.distanceTo(moon.group.position);
+    const focusSunSpan = focus.group.position.distanceTo(sun.group.position);
     let distance = focus.mesh.scale.x * 8;
 
     if (step.cameraMode === "earth") {
@@ -197,13 +200,24 @@ function applyMissionCamera() {
       distance = Math.max(moon.mesh.scale.x * 12, 3.6);
     } else if (step.cameraMode === "surface") {
       distance = Math.max(moon.mesh.scale.x * 5.5, 1.4);
+    } else if (step.cameraMode === "solar-transfer") {
+      distance = Math.max(focusSunSpan * 0.34, 18);
+    } else if (step.cameraMode === "planet") {
+      distance = Math.max(focus.mesh.scale.x * 15, 7);
+    } else if (step.cameraMode === "deep-space") {
+      distance = Math.max(focusSunSpan * 0.3, 20);
+    }
+    if (isGrandTourPath(step.pathMode)) {
+      const lookAheadDistance = missionLayer.markerTarget.position.distanceTo(missionLayer.cameraTarget.position);
+      distance = Math.max(distance, lookAheadDistance + focus.mesh.scale.x * 14);
     }
 
     rig.focusObject(
       missionLayer.cameraTarget,
-      state.mission.stepIndex === 0 && state.mission.stepProgress === 0,
+      false,
       distance,
-      missionViewForStep(step.pathMode, earth.group.position, moon.group.position),
+      missionViewForStep(step.pathMode, earth.group.position, moon.group.position, focus.group.position, sun.group.position),
+      MISSION_CAMERA_TRANSITION_MS,
     );
     state.setFocus(step.focusId);
     state.setActiveFeature(null);
@@ -212,8 +226,15 @@ function applyMissionCamera() {
   }
 }
 
-function missionViewForStep(pathMode: string, earthPos: THREE.Vector3, moonPos: THREE.Vector3) {
-  const markerPos = missionLayer.cameraTarget.position;
+function missionViewForStep(
+  pathMode: string,
+  earthPos: THREE.Vector3,
+  moonPos: THREE.Vector3,
+  focusPos: THREE.Vector3,
+  sunPos: THREE.Vector3,
+) {
+  const cameraTargetPos = missionLayer.cameraTarget.position;
+  const markerPos = missionLayer.markerTarget.position;
   const earthToMoon = moonPos.clone().sub(earthPos).normalize();
   const side = new THREE.Vector3(-earthToMoon.z, 0, earthToMoon.x).normalize();
   let dir: THREE.Vector3;
@@ -224,11 +245,27 @@ function missionViewForStep(pathMode: string, earthPos: THREE.Vector3, moonPos: 
     dir = side.multiplyScalar(0.9).add(new THREE.Vector3(0, 0.55, 0)).add(earthToMoon.multiplyScalar(0.2)).normalize();
   } else if (pathMode === "return") {
     dir = side.multiplyScalar(-0.9).add(new THREE.Vector3(0, 0.5, 0)).add(earthToMoon.multiplyScalar(-0.15)).normalize();
+  } else if (pathMode === "grand-tour" || pathMode === "outer-flyby" || pathMode === "interstellar") {
+    const ahead = cameraTargetPos.clone().sub(markerPos);
+    const fallbackAhead = focusPos.clone().sub(markerPos);
+    const forward = ahead.lengthSq() > 0.001 ? ahead.normalize() : fallbackAhead.normalize();
+    const radial = markerPos.clone().sub(sunPos).normalize();
+    const outerSide = new THREE.Vector3(-forward.z, 0.05, forward.x).normalize();
+    dir = forward
+      .multiplyScalar(-1)
+      .addScaledVector(outerSide, 0.18)
+      .addScaledVector(radial, 0.08)
+      .add(new THREE.Vector3(0, 0.18, 0))
+      .normalize();
   } else {
     dir = markerPos.clone().sub(moonPos).normalize().add(side.multiplyScalar(0.35)).add(new THREE.Vector3(0, 0.22, 0)).normalize();
   }
 
   return viewFromDirection(dir);
+}
+
+function isGrandTourPath(pathMode: string) {
+  return pathMode === "grand-tour" || pathMode === "outer-flyby" || pathMode === "interstellar";
 }
 
 function viewFromDirection(dir: THREE.Vector3) {

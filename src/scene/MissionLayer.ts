@@ -1,8 +1,11 @@
 import * as THREE from "three";
 import type { SimState } from "../state/SimState";
-import { activeMissionStep } from "../data/missions";
+import { activeMissionStep, getMission } from "../data/missions";
+import { getBody } from "../data/bodies";
 import { featureByName } from "../data/features";
 import type { SolarSystem } from "./SolarSystem";
+import { bodyPosition } from "./OrbitMath";
+import { scalePosition, type ScaleConfig } from "./Scaling";
 import { surfacePointFromLatLon } from "./SurfaceCoordinates";
 
 const transferPoints = 80;
@@ -25,7 +28,9 @@ export class MissionLayer {
   private descentPath: THREE.Line;
   private ascentPath: THREE.Line;
   private splashdownPath: THREE.Line;
+  private grandTourPath: THREE.Line;
   private marker: THREE.Group;
+  private cameraLookTarget = new THREE.Object3D();
   private markerCore: THREE.Mesh;
   private markerHalo: THREE.Mesh;
   private scratchEarth = new THREE.Vector3();
@@ -44,8 +49,10 @@ export class MissionLayer {
     this.descentPath = makeLine(0xf5b942, 0.68);
     this.ascentPath = makeLine(0x5ee7e0, 0.58);
     this.splashdownPath = makeLine(0x5ee7e0, 0.62);
+    this.grandTourPath = makeLine(0xf5b942, 0.74);
     this.marker = new THREE.Group();
-    this.marker.name = "apollo-marker";
+    this.marker.name = "mission-marker";
+    this.cameraLookTarget.name = "mission-camera-look-target";
 
     this.markerCore = new THREE.Mesh(
       new THREE.SphereGeometry(1, 24, 16),
@@ -71,11 +78,17 @@ export class MissionLayer {
       this.descentPath,
       this.ascentPath,
       this.splashdownPath,
+      this.grandTourPath,
       this.marker,
+      this.cameraLookTarget,
     );
   }
 
   get cameraTarget(): THREE.Object3D {
+    return this.cameraLookTarget;
+  }
+
+  get markerTarget(): THREE.Object3D {
     return this.marker;
   }
 
@@ -96,6 +109,23 @@ export class MissionLayer {
     const earthOrbitR = earthR * 5.4;
     const lunarOrbitR = moonR * 8.2;
     const markerT = THREE.MathUtils.lerp(step.markerStartT, step.markerT, state.mission.stepProgress);
+
+    if (isGrandTourPath(step.pathMode)) {
+      this.setApolloPathsVisible(false);
+      this.grandTourPath.visible = true;
+      const route = this.grandTourPoints(
+        state.mission.activeId,
+        step.routeBodyIds ?? [],
+        state.toggles,
+        step.pathMode === "interstellar",
+      );
+      setLinePoints(this.grandTourPath, sampleCurve(route));
+      const markerPos = pointOnCurve(route, markerT);
+      this.marker.position.copy(markerPos);
+      this.cameraLookTarget.position.copy(this.grandTourLookTarget(route, markerT, step.markerT));
+      this.scaleMarker(camera);
+      return;
+    }
 
     const landingPoint = this.surfacePoint("Mare Tranquillitatis", lunarOrbitR);
 
@@ -119,15 +149,79 @@ export class MissionLayer {
     this.descentPath.visible = step.pathMode === "surface-descent" || step.pathMode === "surface";
     this.ascentPath.visible = step.pathMode === "surface-ascent" || step.pathMode === "return";
     this.splashdownPath.visible = step.pathMode === "splashdown";
+    this.grandTourPath.visible = false;
 
     const markerPos = this.markerPosition(step.pathMode, markerT, earthR, earthOrbitR, lunarOrbitR, landingPoint);
     this.marker.position.copy(markerPos);
+    this.cameraLookTarget.position.copy(markerPos);
 
+    this.scaleMarker(camera);
+  }
+
+  private setApolloPathsVisible(visible: boolean) {
+    this.launchPath.visible = visible;
+    this.outbound.visible = visible;
+    this.returnPath.visible = visible;
+    this.earthOrbit.visible = visible;
+    this.lunarOrbit.visible = visible;
+    this.descentPath.visible = visible;
+    this.ascentPath.visible = visible;
+    this.splashdownPath.visible = visible;
+  }
+
+  private scaleMarker(camera: THREE.Camera) {
+    const markerPos = this.marker.position;
     const cameraDistance = camera.position.distanceTo(markerPos);
     const pulse = 1 + Math.sin(performance.now() * 0.006) * 0.08;
     const coreScale = THREE.MathUtils.clamp(cameraDistance * 0.006, 0.055, 0.24);
     this.markerCore.scale.setScalar(coreScale);
     this.markerHalo.scale.setScalar(coreScale * 2.1 * pulse);
+  }
+
+  private grandTourPoints(
+    missionId: string | null,
+    bodyIds: string[],
+    scaleConfig: ScaleConfig,
+    extendBeyondLast: boolean,
+  ) {
+    const route = bodyIds
+      .map((id) => this.historicalRoutePoint(missionId, id, scaleConfig) ?? this.system.bodyAt(id)?.group.position.clone())
+      .filter((point): point is THREE.Vector3 => !!point);
+
+    if (extendBeyondLast && route.length > 0) {
+      const sun = this.system.bodyAt("sun")?.group.position ?? new THREE.Vector3();
+      const last = route[route.length - 1];
+      const dir = last.clone().sub(sun).normalize();
+      const fallback = new THREE.Vector3(1, 0.14, 0.2).normalize();
+      const outbound = (dir.lengthSq() > 0 ? dir : fallback).add(new THREE.Vector3(0, 0.16, 0)).normalize();
+      route.push(last.clone().addScaledVector(outbound, Math.max(12, last.distanceTo(sun) * 0.34)));
+    }
+
+    if (route.length === 0) {
+      route.push(this.scratchEarth.clone(), this.scratchMoon.clone());
+    } else if (route.length === 1) {
+      route.push(route[0].clone().add(new THREE.Vector3(1, 0, 0)));
+    }
+
+    return route;
+  }
+
+  private historicalRoutePoint(missionId: string | null, bodyId: string, scaleConfig: ScaleConfig) {
+    const mission = getMission(missionId);
+    const timestampUtc = mission?.steps.find((step) => step.focusId === bodyId)?.timestampUtc;
+    if (!timestampUtc) return null;
+    return bodyScenePositionAt(bodyId, new Date(timestampUtc).getTime(), scaleConfig);
+  }
+
+  private grandTourLookTarget(route: THREE.Vector3[], markerT: number, stageEndT: number) {
+    const markerPos = pointOnCurve(route, markerT);
+    const endPos = pointOnCurve(route, stageEndT);
+    const markerToEnd = endPos.clone().sub(markerPos);
+    if (markerToEnd.lengthSq() < 0.001) return markerPos;
+
+    const legDistance = markerToEnd.length();
+    const lookAheadDistance = Math.max(2.4, legDistance * 0.72);
+    return markerPos.add(markerToEnd.normalize().multiplyScalar(lookAheadDistance));
   }
 
   private markerPosition(
@@ -271,6 +365,35 @@ function samplePath(pointAt: (t: number) => THREE.Vector3, samples = transferPoi
     points.push(pointAt(i / samples));
   }
   return points;
+}
+
+function sampleCurve(points: THREE.Vector3[]) {
+  return curveFromPoints(points).getPoints(Math.max(transferPoints, points.length * 32));
+}
+
+function pointOnCurve(points: THREE.Vector3[], t: number) {
+  return curveFromPoints(points).getPoint(THREE.MathUtils.clamp(t, 0, 1));
+}
+
+function curveFromPoints(points: THREE.Vector3[]) {
+  return new THREE.CatmullRomCurve3(points, false, "centripetal", 0.18);
+}
+
+function isGrandTourPath(pathMode: string) {
+  return pathMode === "grand-tour" || pathMode === "outer-flyby" || pathMode === "interstellar";
+}
+
+function bodyScenePositionAt(bodyId: string, epochMs: number, scaleConfig: ScaleConfig): THREE.Vector3 | null {
+  const body = getBody(bodyId);
+  if (!body) return null;
+  if (!body.parent) return new THREE.Vector3();
+
+  const parent = getBody(body.parent) ?? null;
+  const parentPos = parent ? bodyScenePositionAt(parent.id, epochMs, scaleConfig) ?? new THREE.Vector3() : new THREE.Vector3();
+  const posKm = bodyPosition(body, epochMs);
+  const scaled = { x: 0, y: 0, z: 0 };
+  scalePosition(parent, posKm, scaleConfig, scaled);
+  return parentPos.add(new THREE.Vector3(scaled.x, scaled.y, scaled.z));
 }
 
 function orbitCircle(center: THREE.Vector3, radius: number) {

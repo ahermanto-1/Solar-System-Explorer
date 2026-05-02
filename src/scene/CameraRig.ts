@@ -112,7 +112,13 @@ export class CameraRig {
     this.tweenDuration = 1200;
   }
 
-  focusObject(object: THREE.Object3D, instant = false, overrideDistance = 8, view?: { yaw: number; pitch: number }) {
+  focusObject(
+    object: THREE.Object3D,
+    instant = false,
+    overrideDistance = 8,
+    view?: { yaw: number; pitch: number },
+    transitionDurationMs = 1200,
+  ) {
     this.surfaceLock = null;
     const fromCenter = this.currentCenter();
     if (instant || (!this.target && !this.targetObject)) {
@@ -144,7 +150,11 @@ export class CameraRig {
       this.tweenView = false;
     }
     this.tweenStart = performance.now();
-    this.tweenDuration = 900;
+    this.tweenDuration = transitionDurationMs;
+  }
+
+  isFocusingObject(object: THREE.Object3D): boolean {
+    return this.targetObject === object || this.tweenToObject === object;
   }
 
   focusFeature(body: Body, lat: number, lon: number, instant = false) {
@@ -188,7 +198,6 @@ export class CameraRig {
 
   private idealDistance(body: Body): number {
     const r = body.mesh.scale.x;
-    if (body.data.kind === "star") return 700; // sun click = overview
     if (body.data.kind === "moon") return r * 6;
     return r * 6;
   }
@@ -207,7 +216,7 @@ export class CameraRig {
     let center: THREE.Vector3;
     if ((this.tweenToBody || this.tweenToObject) && this.tweenStart > 0) {
       const t = Math.min(1, (performance.now() - this.tweenStart) / this.tweenDuration);
-      const e = easeInOutCubic(t);
+      const e = easeInOutSmoothStep(t);
       const toPos = this.tweenToObject
         ? this.tweenToObject.position
         : this.surfaceLock && this.tweenToBody === this.surfaceLock.body
@@ -258,8 +267,8 @@ export class CameraRig {
   }
 }
 
-function easeInOutCubic(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+function easeInOutSmoothStep(t: number) {
+  return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
 function closestAngle(from: number, to: number) {

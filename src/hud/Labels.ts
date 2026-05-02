@@ -5,8 +5,9 @@ import type { SimState } from "../state/SimState";
 
 /**
  * DOM-based labels overlaid on the 3D scene. Each body gets a small div that
- * tracks its on-screen position. Hidden when off-screen, behind the camera,
- * or for bodies that occupy fewer than `MIN_PIXEL_SIZE` pixels of the viewport.
+ * tracks its on-screen position. Planet and dwarf-planet labels stay visible
+ * whenever on-screen; moons and other bodies can still be hidden for distance
+ * or contextual clutter.
  */
 export class Labels {
   private root: HTMLElement;
@@ -37,12 +38,8 @@ export class Labels {
       txt.textContent = b.data.name;
       el.append(dot, txt);
       el.addEventListener("click", () => {
-        if (b.data.id === "sun") {
-          (window as any).__overview?.();
-        } else {
-          this.rig.focus(b);
-          this.state.setFocus(b.data.id);
-        }
+        this.rig.focus(b);
+        this.state.setFocus(b.data.id);
       });
       this.root.appendChild(el);
       this.items.set(b.data.id, el);
@@ -89,15 +86,17 @@ export class Labels {
         continue;
       }
 
-      // Distance-based fade: hide when body subtends < 3 px on screen, unless focused
-      const r = b.mesh.scale.x;
-      const dist = camPos.distanceTo(b.group.position);
-      const fov = (cam.fov * Math.PI) / 180;
-      const pxRadius = (r / dist) * (canvasH / (2 * Math.tan(fov / 2)));
       const isFocus = this.state.focusedId === b.data.id;
-      if (!isFocus && pxRadius < 1.5) {
-        el.style.display = "none";
-        continue;
+      const isPersistentPlanet = b.data.kind === "planet" || b.data.kind === "dwarf";
+      if (!isPersistentPlanet && !isFocus) {
+        const r = b.mesh.scale.x;
+        const dist = camPos.distanceTo(b.group.position);
+        const fov = (cam.fov * Math.PI) / 180;
+        const pxRadius = (r / dist) * (canvasH / (2 * Math.tan(fov / 2)));
+        if (pxRadius < 1.5) {
+          el.style.display = "none";
+          continue;
+        }
       }
 
       el.style.display = "flex";
