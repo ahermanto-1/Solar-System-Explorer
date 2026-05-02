@@ -151,6 +151,16 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-height: calc(100vh - 56px - 130px);
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+  overscroll-behavior: contain;
+}
+.left-rail::-webkit-scrollbar { width: 6px; }
+.left-rail::-webkit-scrollbar-thumb {
+  background: rgba(94, 231, 224, 0.18);
+  border-radius: 3px;
 }
 #hud.mission-active .left-rail,
 #hud.feature-active .left-rail {
@@ -200,6 +210,40 @@ body {
   font-size: 11.5px;
   color: var(--text-dim);
   line-height: 1.55;
+}
+.event .event-body-long {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  color: var(--text-dim);
+  line-height: 1.58;
+}
+.event .event-body-long[hidden] {
+  display: none;
+}
+.event .event-body-long p {
+  margin: 0;
+}
+.event-show-more {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 9px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--cyan-dim);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: border-color 80ms, color 80ms;
+}
+.event-show-more:hover {
+  border-color: var(--border-strong);
+  color: var(--cyan);
 }
 
 .spark {

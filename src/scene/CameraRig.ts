@@ -37,19 +37,51 @@ export class CameraRig {
   private dragging = false;
   private lastX = 0;
   private lastY = 0;
+  private pointers = new Map<number, { x: number; y: number }>();
+  private pinchLastDist = 0;
+
+  private getPinchDist(): number {
+    const pts = [...this.pointers.values()];
+    if (pts.length < 2) return 0;
+    const dx = pts[0].x - pts[1].x;
+    const dy = pts[0].y - pts[1].y;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
 
   private onPointerDown = (e: PointerEvent) => {
-    if (e.button !== 0) return;
-    this.dragging = true;
-    this.lastX = e.clientX;
-    this.lastY = e.clientY;
+    this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     this.domElement.setPointerCapture(e.pointerId);
+    if (this.pointers.size === 2) {
+      this.dragging = false;
+      this.pinchLastDist = this.getPinchDist();
+    } else if (this.pointers.size === 1 && e.button === 0) {
+      this.dragging = true;
+      this.lastX = e.clientX;
+      this.lastY = e.clientY;
+    }
   };
   private onPointerUp = (e: PointerEvent) => {
-    this.dragging = false;
+    this.pointers.delete(e.pointerId);
     try { this.domElement.releasePointerCapture(e.pointerId); } catch {}
+    this.dragging = false;
+    if (this.pointers.size === 1) {
+      const [ptr] = this.pointers.values();
+      this.lastX = ptr.x;
+      this.lastY = ptr.y;
+      this.dragging = true;
+    }
   };
   private onPointerMove = (e: PointerEvent) => {
+    this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (this.pointers.size === 2) {
+      const newDist = this.getPinchDist();
+      if (this.pinchLastDist > 0 && newDist > 0) {
+        const factor = this.pinchLastDist / newDist;
+        this.distance = Math.max(this.minDistance(), Math.min(6000, this.distance * factor));
+      }
+      this.pinchLastDist = newDist;
+      return;
+    }
     if (!this.dragging) return;
     const dx = e.clientX - this.lastX;
     const dy = e.clientY - this.lastY;
@@ -251,6 +283,8 @@ export class CameraRig {
     const z = this.distance * cosP * Math.cos(this.yaw);
     this.camera.position.set(center.x + x, center.y + y, center.z + z);
     this.camera.lookAt(center);
+    this.camera.updateMatrixWorld(true);
+    this.camera.matrixWorldInverse.copy(this.camera.matrixWorld).invert();
   }
 
   private currentCenter(): THREE.Vector3 {

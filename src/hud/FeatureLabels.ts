@@ -82,7 +82,9 @@ export class FeatureLabels {
 
       surfacePointFromLatLon(f.lat, f.lon, this.tmpVec);
 
-      // Apply body mesh transform: position + rotation + scale → world-space surface point
+      // Force the world matrix up-to-date so localToWorld reflects this frame's rotation,
+      // not the previous frame (matrixWorld is updated lazily by the renderer).
+      body.mesh.updateWorldMatrix(true, false);
       body.mesh.localToWorld(this.tmpVec);
 
       // Visibility: dot-product of surface normal against camera direction from body center

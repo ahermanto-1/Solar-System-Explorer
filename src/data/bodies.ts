@@ -20,6 +20,7 @@ export interface BodyData {
   gravity: number; // m/s^2
   meanTempC: number;
   description: string;
+  longDescription: string[];
   hasRings?: boolean;
 }
 
@@ -41,6 +42,11 @@ export const BODIES: BodyData[] = [
     gravity: 274,
     meanTempC: 5500,
     description: "Yellow dwarf star at the center of our system. Source of nearly all light and heat.",
+    longDescription: [
+      "The Sun is a G-type main-sequence star containing 99.86% of the solar system's total mass. Its core reaches temperatures of about 15 million °C, where nuclear fusion converts 620 million tonnes of hydrogen into helium every second, releasing the energy that drives nearly all biological and geological processes on Earth. Energy generated in the core takes up to 100,000 years to reach the surface, radiating outward through the radiative and convective zones before escaping as light from the photosphere.",
+      "Solar activity follows an 11-year cycle marked by changing sunspot numbers and intense magnetic events. Solar flares and coronal mass ejections hurl billions of tonnes of charged particles across the solar system, creating auroras near Earth's poles and occasionally disrupting satellites, radio communications, and power grids. The corona — the Sun's outer atmosphere — is paradoxically hotter than its surface, reaching millions of degrees, a mystery that modern solar physics is still unraveling.",
+      "At roughly 4.6 billion years old, the Sun has consumed about half its hydrogen fuel. In approximately 5 billion years it will expand into a red giant, swelling to perhaps 200 times its current size and engulfing Mercury, Venus, and possibly Earth. It will then shed its outer layers as a planetary nebula, leaving behind a dense, Earth-sized white dwarf that will cool over trillions of years.",
+    ],
   },
   {
     id: "mercury",
@@ -57,6 +63,11 @@ export const BODIES: BodyData[] = [
     gravity: 3.7,
     meanTempC: 167,
     description: "Smallest planet, no atmosphere. Surface scarred by craters; extreme temperature swings.",
+    longDescription: [
+      "Mercury is the smallest planet in the solar system and orbits closest to the Sun, completing a year in just 88 Earth days. Its highly elliptical orbit and a unique 3:2 spin-orbit resonance — rotating exactly three times for every two orbits — mean that a single Mercurian solar day (sunrise to sunrise) lasts 176 Earth days, twice as long as its year. This resonance was only confirmed in the 1960s using radar observations, overturning a long-held belief that Mercury kept one face permanently toward the Sun.",
+      "Without a significant atmosphere to distribute or retain heat, Mercury experiences the most extreme temperature swings of any planet: sunlit surfaces near the equator reach 430 °C while the night side plunges to −180 °C. Its ancient, heavily cratered surface resembles the Moon. The Caloris Basin — one of the largest impact structures in the solar system at roughly 1,550 km across — was formed by a collision so violent it sent shockwaves through the entire planet, creating a chaotic, jumbled terrain at the exact antipodal point on the opposite side.",
+      "Beneath its thin crust, Mercury harbors a disproportionately large iron core extending to about 85% of the planet's radius, generating a weak but measurable global magnetic field. NASA's MESSENGER spacecraft orbited Mercury from 2011 to 2015, discovering water ice preserved in permanently shadowed polar craters and revealing that volcanism shaped much of the planet's surface billions of years ago. ESA's BepiColombo mission, launched in 2018, is en route to Mercury and will conduct the most detailed study of the planet ever attempted.",
+    ],
   },
   {
     id: "venus",
@@ -73,6 +84,11 @@ export const BODIES: BodyData[] = [
     gravity: 8.87,
     meanTempC: 464,
     description: "Hottest planet. Thick CO₂ atmosphere produces a runaway greenhouse effect.",
+    longDescription: [
+      "Venus is nearly identical to Earth in size and mass, leading early astronomers to imagine a lush twin world beneath its clouds. In reality it diverged dramatically in evolution. Venus rotates in the opposite direction to most planets — so slowly that its day (243 Earth days) is longer than its year (225 Earth days) — meaning the Sun rises in the west and sets in the east. No one knows exactly why Venus ended up rotating retrograde; a giant ancient impact and atmospheric tidal forces are both proposed explanations.",
+      "A thick atmosphere composed of 96.5% carbon dioxide traps heat in a runaway greenhouse effect, raising surface temperatures to a searing 464 °C — constant day and night, pole to pole. Surface pressure is approximately 90 times that at sea level on Earth, equivalent to being 900 metres underwater. Layers of sulfuric acid clouds permanently enshroud the planet, reflecting about 70% of incoming sunlight and making Venus the brightest natural object in the night sky after the Moon, despite its hellish surface.",
+      "Radar mapping by NASA's Magellan spacecraft in the 1990s revealed a surface dominated by vast volcanic plains, highland plateaus, and over 1,600 major volcanic features — more volcanoes than any other planet. Recent analysis of Magellan data and observations from ESA's Venus Express mission suggest that Venus may still be geologically active today, with evidence of fresh lava flows less than a million years old. ESA's EnVision mission and NASA's VERITAS are planned to return to Venus in the 2030s to investigate its potential ongoing volcanism and complex history.",
+    ],
   },
   {
     id: "earth",
@@ -89,6 +105,11 @@ export const BODIES: BodyData[] = [
     gravity: 9.81,
     meanTempC: 15,
     description: "The only known world to harbor life. Liquid water oceans cover 71% of the surface.",
+    longDescription: [
+      "Earth is the third planet from the Sun and the only body in the solar system confirmed to support life. It sits in the Sun's habitable zone — the narrow range of distances where liquid water can exist at the surface — and benefits from a thin but effective atmosphere of nitrogen and oxygen that moderates temperature, shields against ultraviolet radiation, and enables the water cycle. A global magnetic field generated by the liquid iron outer core deflects solar wind that would otherwise strip the atmosphere away over geological time.",
+      "Earth is fully differentiated into a solid inner iron core, a liquid outer core, a silicate mantle, and a thin rocky crust. Plate tectonics — unique among known rocky planets — continuously reshapes the surface, recycles carbon between the atmosphere and interior, and is thought to play a critical role in stabilising long-term climate conditions favorable to life. The Moon's gravitational influence also stabilises Earth's axial tilt between about 22° and 24.5°, preventing the wild climatic swings that might otherwise render the planet far less hospitable.",
+      "Life has existed on Earth for at least 3.8 billion years, evolving from simple single-celled organisms into an estimated 8.7 million species across every environment from deep-ocean hydrothermal vents to high-altitude mountain peaks. Photosynthesis transformed the atmosphere by filling it with oxygen around 2.4 billion years ago — an event known as the Great Oxygenation Event — making possible the complex multicellular life that followed. Earth remains the only world where we have direct evidence of life, making it the benchmark for understanding habitability across the cosmos.",
+    ],
   },
   {
     id: "moon",
@@ -105,6 +126,11 @@ export const BODIES: BodyData[] = [
     gravity: 1.62,
     meanTempC: -23,
     description: "Earth's only natural satellite. Tidally locked — same face always toward Earth.",
+    longDescription: [
+      "The Moon formed roughly 4.5 billion years ago when a Mars-sized protoplanet called Theia struck the early Earth in an oblique collision, ejecting an enormous cloud of vaporised rock that gradually coalesced into Earth's sole natural satellite. At one-quarter of Earth's diameter it is exceptionally large relative to its host — a relationship unique in the inner solar system — and the resulting Earth-Moon system behaves in some ways more like a double planet than a planet and moon.",
+      "The lunar surface is divided into dark, relatively smooth maria — ancient solidified lava plains formed by volcanic flooding between 3 and 4 billion years ago — and lighter, heavily cratered highland regions that represent the original primordial crust. Without an atmosphere, magnetic field, or significant geological activity, the surface has been sculpted almost entirely by meteorite impacts over billions of years. A layer of fine, glassy regolith several metres deep covers everything, created by the continuous pulverisation of surface rock by micrometeorites and cosmic radiation.",
+      "The Moon is tidally locked to Earth, always presenting the same hemisphere toward us while the far side remained completely unseen until Soviet spacecraft photographed it in 1959. Its gravity drives Earth's ocean tides, and its presence helps stabilise Earth's axial tilt. Between 1969 and 1972, six Apollo missions landed 12 astronauts on the lunar surface, returning 382 kilograms of rock and soil samples that transformed our understanding of the solar system's early history. A new era of lunar exploration, including crewed Artemis landings, is now underway.",
+    ],
   },
   {
     id: "mars",
@@ -121,6 +147,11 @@ export const BODIES: BodyData[] = [
     gravity: 3.71,
     meanTempC: -65,
     description: "The Red Planet. Iron oxide on its surface, two tiny moons, and the largest volcano in the solar system.",
+    longDescription: [
+      "Mars is the fourth planet from the Sun and the most extensively explored world beyond Earth. Its iconic red color comes from iron oxide — rust — coating much of its surface. Mars is home to Olympus Mons, the largest volcano in the solar system at 22 km tall and 600 km wide, dwarfing any mountain on Earth. Valles Marineris, a canyon system stretching over 4,000 km along the Martian equator and reaching depths of 7 km, is large enough to span the entire continental United States.",
+      "Mars has a thin atmosphere of mostly carbon dioxide with a surface pressure less than 1% of Earth's — too thin to support liquid water at the surface today and too thin to effectively shield against cosmic radiation. Temperatures average around −65 °C, swinging from roughly 20 °C at the equator during summer afternoons to −125 °C at the poles in winter. Global dust storms capable of shrouding the entire planet for months are a regular feature of the Martian climate, powered by solar heating of dust-laden air.",
+      "Ancient river valleys, delta deposits, lake-bed sediments, and minerals that form only in liquid water tell a compelling story: Mars once had a warmer, wetter climate with liquid water flowing across its surface billions of years ago. Today NASA's Perseverance rover and the Ingenuity helicopter are actively exploring Jezero Crater — an ancient river delta — searching for biosignatures of past microbial life preserved in the rocks. Multiple space agencies are working toward eventual crewed missions to Mars, drawn by the planet's scientific promise and its potential as a future human outpost.",
+    ],
   },
   {
     id: "phobos",
@@ -137,6 +168,11 @@ export const BODIES: BodyData[] = [
     gravity: 0.0057,
     meanTempC: -40,
     description: "Larger of Mars's two moons. Will eventually crash into Mars or break into a ring.",
+    longDescription: [
+      "Phobos is the larger of Mars's two small moons, yet its average radius of only 11.27 km makes it one of the smallest known moons in the solar system. Irregularly shaped and heavily cratered, its most prominent feature is Stickney crater — roughly 9 km wide — which represents a collision so powerful it nearly shattered the entire moon. Phobos is covered in a thick layer of pulverised rock (regolith) and crossed by a system of parallel grooves thought to be stress fractures caused by tidal forces from Mars or by the ancient Stickney impact.",
+      "Phobos has the shortest orbital period of any known moon: it completes one orbit around Mars in just 7 hours and 39 minutes — faster than Mars rotates on its own axis. This sub-synchronous orbit means that from the Martian surface, Phobos rises in the west and sets in the east, traversing the sky roughly twice per Martian day. Its orbit is so close to Mars — only about 6,000 km above the surface — that it cannot be seen at all from latitudes above about 70°.",
+      "Tidal forces from Mars are decelerating Phobos and drawing it steadily closer to the planet at a rate of about 1.8 cm per year. Within 30 to 50 million years, it will either impact Mars directly or be torn apart by tidal forces into a diffuse ring of debris encircling the planet. The origin of Phobos remains debated: its very low density (1.87 g/cm³) and spectral properties resemble certain classes of carbonaceous asteroid, suggesting it may have been captured from the asteroid belt, though its near-circular equatorial orbit complicates this hypothesis.",
+    ],
   },
   {
     id: "deimos",
@@ -153,6 +189,11 @@ export const BODIES: BodyData[] = [
     gravity: 0.003,
     meanTempC: -40,
     description: "Smaller, outermost Martian moon. Smooth, dust-covered surface.",
+    longDescription: [
+      "Deimos is the smaller and more distant of Mars's two moons, with an average radius of about 6.2 km. Both Martian moons were discovered in August 1877 by American astronomer Asaph Hall, who named them after the sons of the Greek god Ares — Phobos (Fear) and Deimos (Dread). Unlike the rougher Phobos, Deimos has a remarkably smooth appearance: a thick blanket of fine regolith has gradually filled in and softened most impact craters, giving it the most uniform and featureless surface texture of any known moon.",
+      "Deimos orbits Mars at a distance of roughly 23,463 km, completing one orbit in about 30.3 hours — slightly longer than a Martian day. This means that from the Martian surface, Deimos rises in the east and sets in the west very slowly, remaining above the horizon for about 2.7 Martian days at a time. Unlike Phobos, whose orbit is decaying, Deimos is slowly drifting outward due to tidal interactions with Mars and will remain in orbit for billions of years.",
+      "The origin of Deimos is uncertain. Its low density (around 1.47 g/cm³) and spectral similarity to carbonaceous chondrite meteorites suggest it could be a captured outer asteroid-belt object, though the mechanisms by which such a body could have been captured into a near-circular, near-equatorial orbit are not well understood. Some models propose that both Martian moons formed from debris ejected by a large ancient impact on Mars itself. Future missions — including Japan's Martian Moons eXploration (MMX) spacecraft — plan to collect samples from Phobos to help settle the debate.",
+    ],
   },
   {
     id: "jupiter",
@@ -169,6 +210,11 @@ export const BODIES: BodyData[] = [
     gravity: 24.79,
     meanTempC: -110,
     description: "Largest planet. Gas giant with the Great Red Spot — a storm larger than Earth.",
+    longDescription: [
+      "Jupiter is the largest planet in the solar system, with a mass more than twice that of all other planets combined and a diameter about 11 times that of Earth. It is a gas giant composed primarily of hydrogen (~75% by mass) and helium (~24%), with no solid surface — just increasingly compressed gas and liquid transitioning deep within to metallic hydrogen, a state where hydrogen conducts electricity like a metal. This metallic hydrogen layer, swirling in Jupiter's fast rotation, generates the strongest planetary magnetic field in the solar system — nearly 20,000 times more powerful than Earth's.",
+      "Jupiter's visible atmosphere is a dynamic tapestry of alternating eastward and westward jet streams that create the familiar light and dark bands. The Great Red Spot — a persistent high-pressure anticyclonic storm — has been observed for at least 350 years and is wide enough to swallow the entire Earth, though it has been gradually shrinking in recent decades. Smaller storms, lightning strikes far more powerful than any on Earth, and aurora ovals hundreds of times more energetic than Earth's northern lights are ongoing features of Jupiter's turbulent atmosphere.",
+      "Jupiter plays a crucial gravitational role as the solar system's largest planet, deflecting comets and asteroids that might otherwise threaten the inner planets — and occasionally directing them inward, as with the Shoemaker-Levy 9 comet that crashed into Jupiter in 1994. It has 95 confirmed moons — including the four large Galilean moons discovered by Galileo Galilei in 1610 — and a faint ring system. NASA's Juno spacecraft has been orbiting Jupiter since 2016, probing the planet's interior structure, magnetic field, and atmospheric dynamics in unprecedented detail.",
+    ],
     hasRings: true,
   },
   {
@@ -186,6 +232,11 @@ export const BODIES: BodyData[] = [
     gravity: 1.796,
     meanTempC: -130,
     description: "Most volcanically active body in the solar system. Sulfur eruptions paint its surface yellow.",
+    longDescription: [
+      "Io is the innermost of Jupiter's four large Galilean moons and by far the most volcanically active body in the solar system. It hosts over 400 active volcanoes, continuously covering its surface with sulfur, sulfur dioxide frost, and silicate lava at a pace that completely resurfaces the moon over geological time — explaining why Io has virtually no impact craters despite being billions of years old. Some eruptions launch plumes of material up to 500 km above the surface, and the moon glows infrared-bright in telescope images from the heat of its volcanic activity.",
+      "The relentless volcanic activity is driven by tidal heating. Io is locked into a gravitational resonance with Europa and Ganymede — called the Laplace resonance — where Io completes exactly four orbits for every one of Ganymede's and two of Europa's. This forces Io's orbit to remain slightly elliptical, causing Jupiter's enormous gravity to continuously flex and squeeze the moon's interior as the distance between them changes. The friction of this tidal flexing generates an estimated 100 terawatts of heat — more internal heat per unit area than any other body in the solar system.",
+      "Io's surface features include lava lakes of molten silicate rock, calderas exceeding 200 km in diameter, and mountains up to 18 km tall — taller than Everest — formed not by volcanism but by compressional tectonics as the crust is pushed upward by the weight of fresh volcanic deposits. The Voyager 1 spacecraft first revealed Io's volcanic nature in 1979 in one of the great discoveries of the space age. NASA's Juno mission has conducted close flybys of Io in 2023 and 2024, returning the most detailed images yet of its tortured surface.",
+    ],
   },
   {
     id: "europa",
@@ -202,6 +253,11 @@ export const BODIES: BodyData[] = [
     gravity: 1.314,
     meanTempC: -160,
     description: "Smooth icy crust hides a global liquid water ocean — a top candidate for life.",
+    longDescription: [
+      "Europa is the second of Jupiter's Galilean moons and one of the most scientifically compelling objects in the solar system. Its surface is encased in a smooth shell of water ice — one of the flattest surfaces known, with relief rarely exceeding a few hundred metres — crosscut by a network of reddish-brown fractures, ridges, and bands called lineae. These surface features, some stretching thousands of kilometres, form as tidal stresses crack and shift the ice shell, allowing warmer material from below to well up and refreeze at the surface. Very few impact craters are visible, indicating a geologically young surface that is continuously renewed.",
+      "Beneath the ice (estimated to be 15–25 km thick) lies a global saltwater ocean estimated to contain roughly twice the volume of all of Earth's oceans combined. The ocean stays liquid despite Europa's frigid environment — roughly 628 million km from the Sun — because tidal heating from Jupiter's gravity continuously warms Europa's interior. Magnetic field measurements by the Galileo spacecraft confirmed that a conducting liquid layer (almost certainly a salty ocean) exists beneath the ice, interacting with Jupiter's powerful magnetic field.",
+      "Europa is considered one of the most promising targets in the search for extraterrestrial life, because it may provide all three requirements thought necessary: liquid water, chemical energy, and the right chemistry. Hydrothermal vents on the ocean floor could drive chemical reactions that support microbial communities, as they do in Earth's deep oceans. NASA's Europa Clipper spacecraft, launched in October 2024, will conduct dozens of close flybys of Europa, characterising the ice shell, subsurface ocean, and surface chemistry to assess the moon's potential habitability.",
+    ],
   },
   {
     id: "ganymede",
@@ -218,6 +274,11 @@ export const BODIES: BodyData[] = [
     gravity: 1.428,
     meanTempC: -160,
     description: "Largest moon in the solar system — bigger than Mercury. Has its own magnetic field.",
+    longDescription: [
+      "Ganymede is the largest moon in the solar system — at 5,268 km in diameter it is larger than the planet Mercury, though less massive since it is composed partly of ice. It is the only moon known to generate its own intrinsic magnetic field, creating a miniature magnetosphere that carves a bubble within Jupiter's much larger magnetosphere and produces its own aurora ovals. This magnetic field is thought to arise from convection within a liquid iron or iron-sulfide core, much like Earth's own field.",
+      "Ganymede's surface is divided into two distinct terrains. Dark, ancient regions called regio are among the most heavily cratered surfaces in the solar system, representing pristine material from the moon's earliest crust. Interspersed are lighter, younger grooved terrains reshaped by tectonic extension and ice flows — evidence that Ganymede was once geologically active. Its interior is fully differentiated into an iron core, a rocky silicate mantle, and an outer icy shell, a structure that required significant internal heat early in its history.",
+      "The Hubble Space Telescope detected evidence of a global subsurface saltwater ocean within Ganymede, sandwiched between layers of ice — potentially containing more liquid water than all of Earth's oceans. ESA's JUICE (Jupiter Icy Moons Explorer) mission, launched in 2023, is en route to the Jovian system and will eventually enter orbit around Ganymede in 2034 — the first spacecraft ever to orbit a moon other than our own. JUICE will study Ganymede's interior, ocean, ice shell, and magnetic environment in detail.",
+    ],
   },
   {
     id: "callisto",
@@ -234,6 +295,11 @@ export const BODIES: BodyData[] = [
     gravity: 1.235,
     meanTempC: -139,
     description: "Most heavily cratered body known. Ancient surface, possibly an ocean below.",
+    longDescription: [
+      "Callisto is the outermost of Jupiter's four Galilean moons and possesses the most heavily cratered surface of any known body in the solar system. This battered landscape is a geological archive stretching back roughly 4 billion years, preserving a record of the Late Heavy Bombardment — a period of intense asteroid and comet impacts that shaped the early solar system. Every square kilometre tells a story of ancient collisions, with craters layered upon craters in a dense palimpsest of impacts.",
+      "Unlike the other Galilean moons, Callisto shows almost no signs of internal geological activity: no volcanism, no mountain-building, no evidence of plate movement. It appears to be largely undifferentiated — ice and rock mixed throughout rather than separated into distinct layers — which may mean it formed slowly enough that internal heat was radiated away before it could drive differentiation. Its most prominent feature is the Valhalla multi-ring impact basin, where concentric rings of ancient impact scarps spread nearly 4,000 km across the surface — the largest such structure in the solar system.",
+      "Despite Callisto's geologically inert exterior, the Galileo spacecraft detected magnetic fluctuations consistent with a subsurface conducting layer — most likely a salty liquid water ocean buried deep beneath the ice, though far less certain than Europa's or Ganymede's. It has a thin, transient atmosphere of carbon dioxide and possibly molecular oxygen. Callisto's position far from Jupiter's intense radiation belts — in stark contrast to Io, Europa, and Ganymede — makes it the most hospitable Jovian moon for potential future human exploration as a base for operations in the Jupiter system.",
+    ],
   },
   {
     id: "saturn",
@@ -250,6 +316,11 @@ export const BODIES: BodyData[] = [
     gravity: 10.44,
     meanTempC: -140,
     description: "Famed for its spectacular ring system of ice and rock. Less dense than water.",
+    longDescription: [
+      "Saturn is the sixth planet from the Sun, the second largest in the solar system, and one of the most visually striking objects in the night sky. It is the least dense planet — with a mean density of just 0.687 g/cm³ it would theoretically float in a large enough body of water. Like Jupiter it is a gas giant composed primarily of hydrogen and helium, rotating so rapidly (a day of about 10.66 hours) that it is visibly flattened at the poles and bulging at the equator. Powerful jet streams in its atmosphere can reach speeds of 1,800 km/h.",
+      "Saturn's iconic ring system is the most extensive in the solar system, stretching up to 282,000 km from the planet's centre but only 10 to 100 metres thick — a ratio comparable to a sheet of paper scaled to the size of a football field. The rings are composed primarily of water ice particles and rocky debris ranging from microscopic grains to chunks the size of a house. They are organised into several main divisions (the A, B, C, D, E, F, and G rings) separated by gaps created by gravitational resonances with Saturn's moons, most famously the Cassini Division maintained by the moon Mimas.",
+      "Saturn has 146 confirmed moons — more than any other planet — with the diversity ranging from Titan (larger than Mercury, with a thick atmosphere) to tiny irregular captured bodies just a few kilometres across. The Cassini-Huygens mission, which orbited Saturn from 2004 to 2017, transformed our understanding of the Saturnian system: it discovered active geysers on Enceladus, revealed methane lakes on Titan's surface via the Huygens lander, and observed the rings in extraordinary detail. Scientists now believe Saturn's rings may be geologically recent — perhaps only 100 to 400 million years old — and will gradually spiral into the planet over the next 100 million years.",
+    ],
     hasRings: true,
   },
   {
@@ -267,6 +338,11 @@ export const BODIES: BodyData[] = [
     gravity: 1.352,
     meanTempC: -179,
     description: "Only moon with a thick atmosphere. Liquid methane lakes dot its surface.",
+    longDescription: [
+      "Titan is Saturn's largest moon, the second largest in the solar system, and the only moon known to possess a substantial atmosphere. Its nitrogen-dominated atmosphere — similar in composition to Earth's but 1.5 times denser at the surface — is laden with organic haze molecules (tholins) created by solar ultraviolet radiation breaking apart methane and nitrogen, giving Titan a distinctive orange colour visible from Earth. This thick atmosphere prevented direct imaging of Titan's surface until the Cassini spacecraft's radar and infrared instruments revealed what lies beneath.",
+      "Titan's surface, at −179 °C, experiences a full methane hydrological cycle analogous to Earth's water cycle. Methane and ethane rain from the sky, flow through river channels, and collect in vast polar lakes and seas — including Ligeia Mare and Kraken Mare, the latter larger than the Caspian Sea. Dunes of organic particles sculpted by wind stretch for hundreds of kilometres near the equator. While liquid water is impossible at Titan's surface temperatures, the landscape is strikingly Earth-like in its variety of rivers, coastlines, plains, and mountains made of water ice rather than rock.",
+      "Titan's rich inventory of organic chemistry — including amino acid precursors and complex carbon compounds — makes it a compelling laboratory for prebiotic chemistry, even if life as we know it seems unlikely given the absence of liquid water at the surface. A potential exotic form of life using liquid methane as a solvent has been theorised. ESA's Huygens probe made the first — and so far only — landing in the outer solar system when it touched down on Titan's surface in January 2005. NASA's Dragonfly rotorcraft mission, planned for arrival in 2034, will hop across Titan's surface sampling its chemistry in multiple locations.",
+    ],
   },
   {
     id: "enceladus",
@@ -283,6 +359,11 @@ export const BODIES: BodyData[] = [
     gravity: 0.113,
     meanTempC: -198,
     description: "Geyser-spewing icy moon. Plumes from its south pole feed Saturn's E ring.",
+    longDescription: [
+      "Enceladus is a small icy moon of Saturn — just 504 km in diameter — yet it is one of the most scientifically important bodies in the solar system. Its south polar region is laced with parallel fractures nicknamed 'tiger stripes' from which enormous geysers continuously erupt, shooting plumes of water vapour, ice particles, salts, and organic compounds hundreds of kilometres into space. This material feeds directly into Saturn's tenuous E ring, constantly replenishing it. The surface near the south pole is anomalously warm — heated from below — and is one of the youngest surfaces in the solar system.",
+      "When NASA's Cassini spacecraft flew directly through Enceladus's plumes, its instruments detected water ice, sodium chloride, potassium salts, silica nanoparticles (indicating hot water dissolving rock), molecular hydrogen, and complex organic compounds including amino acid precursors. This chemical fingerprint strikingly resembles the environment found near hydrothermal vents on Earth's ocean floors. Beneath Enceladus's icy crust lies a confirmed global saltwater ocean — maintained in liquid form by tidal heating driven by the moon's slightly elliptical orbit around Saturn.",
+      "The combination of liquid water, a sustained chemical energy source (hydrothermal activity), organic molecules, and relatively mild pH (around 11 — alkaline but not extreme) makes Enceladus one of the best known candidates for extraterrestrial life in the solar system. Remarkably, the ocean's chemistry can be sampled without landing on Enceladus — a spacecraft flying through the plumes could collect and analyse ocean material directly. Several mission concepts for a dedicated Enceladus ocean explorer have been proposed, making it a high priority target in the coming decades of solar system exploration.",
+    ],
   },
   {
     id: "uranus",
@@ -299,6 +380,11 @@ export const BODIES: BodyData[] = [
     gravity: 8.69,
     meanTempC: -195,
     description: "Ice giant tipped on its side. Rotates almost perpendicular to its orbit.",
+    longDescription: [
+      "Uranus is the seventh planet from the Sun and was the first to be discovered with a telescope, by William Herschel in 1781. It is classified as an ice giant — distinct from the gas giants Jupiter and Saturn — because beneath its hydrogen-helium outer atmosphere lies a deep mantle of water, methane, and ammonia in a hot, dense 'icy' state (not solid ice, but a superheated ionic fluid). Methane in the upper atmosphere absorbs red light and reflects blue-green light, giving Uranus its distinctive pale cyan colour.",
+      "Uranus's defining feature is its extraordinary axial tilt of 97.77°, meaning the planet essentially rolls around the Sun on its side. This is thought to result from a massive collision with an Earth-sized body early in the solar system's history. As a consequence, Uranus experiences the most extreme seasons of any planet: each pole receives 42 years of continuous sunlight followed by 42 years of continuous darkness per 84-year orbit. Despite receiving more solar energy during its long polar summer than the equatorial regions, Uranus's atmosphere is surprisingly uniform in temperature — a puzzle that planetary scientists have yet to fully explain.",
+      "Uranus has 27 known moons, all named after characters from Shakespeare's plays and Alexander Pope's poem The Rape of the Lock, including Titania, Oberon, Miranda, Ariel, and Umbriel. It also possesses a system of 13 narrow, dark rings discovered in 1977. Voyager 2 remains the only spacecraft to have visited Uranus, during a brief flyby in January 1986 that revealed a nearly featureless, cloud-free disc, a complex and highly tilted magnetic field, and the first close-up views of the moons. A dedicated Uranus orbiter and probe mission is currently the highest-priority large mission in NASA's planetary science decadal survey.",
+    ],
     hasRings: true,
   },
   {
@@ -316,6 +402,11 @@ export const BODIES: BodyData[] = [
     gravity: 11.15,
     meanTempC: -200,
     description: "Windiest planet — supersonic gusts up to 2,100 km/h. Deep blue from atmospheric methane.",
+    longDescription: [
+      "Neptune is the eighth and farthest known planet from the Sun, orbiting at an average distance of 30.1 AU and taking 164.8 Earth years to complete one orbit. It holds a unique place in astronomical history: Neptune was the first planet to be predicted mathematically before it was observed. In the 1840s, both John Couch Adams in England and Urbain Le Verrier in France independently calculated Neptune's expected position from unexplained perturbations in Uranus's orbit, and the planet was found within 1° of Le Verrier's prediction in 1846 — a triumph of Newtonian mechanics.",
+      "Neptune has the strongest winds in the solar system, with supersonic gusts at its cloud tops exceeding 2,100 km/h — faster than the speed of sound on Earth. Its vivid deep blue colour results from methane in the atmosphere preferentially absorbing red wavelengths. Despite receiving roughly 900 times less sunlight than Earth, Neptune emits about 2.6 times more heat than it receives from the Sun, suggesting significant internal heat generation — possibly from slow gravitational contraction or chemical differentiation still ongoing in its interior.",
+      "Neptune has 16 known moons, the largest being Triton — the sixth largest moon in the solar system and one of the coldest bodies ever measured at −235 °C. Triton is geologically active, with geysers of nitrogen gas erupting from its south polar cap, and it orbits Neptune in the retrograde direction (opposite to Neptune's rotation), strongly suggesting it was captured from the Kuiper Belt. Triton is slowly spiraling inward and in about 3.6 billion years will be torn apart into a ring system. Voyager 2's flyby in August 1989 remains humanity's only close encounter with Neptune.",
+    ],
   },
   {
     id: "pluto",
@@ -332,6 +423,11 @@ export const BODIES: BodyData[] = [
     gravity: 0.62,
     meanTempC: -229,
     description: "Dwarf planet in the Kuiper Belt. Heart-shaped nitrogen ice plain on its surface.",
+    longDescription: [
+      "Pluto was discovered in 1930 by 24-year-old American astronomer Clyde Tombaugh at the Lowell Observatory, and was celebrated as the ninth planet for 76 years. In 2006, the International Astronomical Union formally adopted a new definition of 'planet' — requiring a body to have cleared the neighbourhood around its orbit — and Pluto was reclassified as a dwarf planet, a decision that remains scientifically and publicly controversial. Pluto is a member of the Kuiper Belt, a vast reservoir of icy bodies beyond Neptune, and is one of the largest known trans-Neptunian objects at roughly two-thirds the diameter of Earth's Moon.",
+      "NASA's New Horizons spacecraft flew past Pluto in July 2015 — the culmination of a 9.5-year, 4.8-billion-km journey — and revealed a world of astonishing geological diversity and activity. The most striking feature is Tombaugh Regio, the informal 'heart': a 1,000-km-wide smooth plain of nitrogen ice called Sputnik Planitia, which is divided into convective cells and surrounded by water-ice mountain ranges reaching 3,500 m tall. Evidence of glacial flow, possible cryovolcanism, and surprisingly complex geology showed that even small, cold, distant worlds can be geologically alive.",
+      "Pluto has a thin nitrogen atmosphere that expands outward when the planet is near perihelion (closest approach to the Sun) and refreezes and collapses onto the surface as it recedes. It has five known moons, the largest being Charon — at roughly half Pluto's diameter and one-eighth its mass, so massive that the two orbit a common barycentre (gravitational centre) located in space between them, leading some scientists to describe them as a binary dwarf planet. New Horizons continued deeper into the Kuiper Belt after its Pluto flyby, providing humanity's first close-up view of a pristine Kuiper Belt object — the contact binary Arrokoth — in January 2019.",
+    ],
   },
 ];
 

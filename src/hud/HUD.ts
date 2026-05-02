@@ -78,6 +78,10 @@ export class HUD {
     mobileSpeedBtns: [] as HTMLButtonElement[],
     mobileTimeline: null as HTMLInputElement | null,
     mobileTrueScale: null as HTMLInputElement | null,
+    eventBodyLong: null as HTMLElement | null,
+    eventShowMore: null as HTMLButtonElement | null,
+    mobileEventBodyLong: null as HTMLElement | null,
+    mobileEventShowMore: null as HTMLButtonElement | null,
     featureCard: null as HTMLElement | null,
     missionTopButton: null as HTMLButtonElement | null,
     missionPanel: null as HTMLElement | null,
@@ -85,6 +89,9 @@ export class HUD {
     missionMiniCanvases: [] as HTMLCanvasElement[],
   };
 
+  private leftRailExpanded = false;
+  private mobileInfoExpanded = false;
+  private prevFocusedId = "";
   private sparkTickAccum = 0;
   private missionPanelOpen = false;
   private onKeyDown = (e: KeyboardEvent) => {
@@ -213,6 +220,21 @@ export class HUD {
     evBody.className = "event-body";
     ev.appendChild(evBody);
     this.el.eventBody = evBody;
+
+    const evBodyLong = document.createElement("div");
+    evBodyLong.className = "event-body-long";
+    evBodyLong.hidden = true;
+    ev.appendChild(evBodyLong);
+    this.el.eventBodyLong = evBodyLong;
+
+    const evShowMore = btn("Show more");
+    evShowMore.className = "event-show-more";
+    evShowMore.addEventListener("click", () => {
+      this.leftRailExpanded = !this.leftRailExpanded;
+      this.syncExpansion();
+    });
+    ev.appendChild(evShowMore);
+    this.el.eventShowMore = evShowMore;
 
     rail.appendChild(ev);
 
@@ -405,7 +427,11 @@ export class HUD {
 
     const status = document.createElement("button");
     status.className = "mobile-status";
-    status.addEventListener("click", () => this.toggleMobilePanel("info"));
+    status.addEventListener("click", () => {
+      this.mobileInfoExpanded = true;
+      this.syncExpansion();
+      this.setMobilePanel("info");
+    });
     const statusLabel = document.createElement("span");
     statusLabel.className = "mobile-status-label";
     statusLabel.textContent = "FOCUS";
@@ -487,10 +513,21 @@ export class HUD {
     title.className = "event-title";
     const body = document.createElement("div");
     body.className = "event-body";
-    event.append(eventHeader, title, body);
+    const bodyLong = document.createElement("div");
+    bodyLong.className = "event-body-long";
+    bodyLong.hidden = true;
+    const showMore = btn("Show more");
+    showMore.className = "event-show-more";
+    showMore.addEventListener("click", () => {
+      this.mobileInfoExpanded = !this.mobileInfoExpanded;
+      this.syncExpansion();
+    });
+    event.append(eventHeader, title, body, bodyLong, showMore);
     this.el.mobileEventTag = eventRight;
     this.el.mobileEventTitle = title;
     this.el.mobileEventBody = body;
+    this.el.mobileEventBodyLong = bodyLong;
+    this.el.mobileEventShowMore = showMore;
 
     const met = panel("met mobile-met");
     met.appendChild(label("SIM TIME"));
@@ -707,6 +744,13 @@ export class HUD {
     const focus = getBody(this.state.focusedId);
     if (!focus) return;
 
+    if (this.state.focusedId !== this.prevFocusedId) {
+      this.prevFocusedId = this.state.focusedId;
+      this.leftRailExpanded = false;
+      this.mobileInfoExpanded = false;
+      this.syncExpansion();
+    }
+
     if (this.el.crumbTarget) this.el.crumbTarget.textContent = focus.name.toUpperCase();
     if (this.el.mobileTarget) this.el.mobileTarget.textContent = focus.name.toUpperCase();
     if (this.el.mobileDescription) this.el.mobileDescription.textContent = focus.description;
@@ -716,6 +760,8 @@ export class HUD {
     if (this.el.mobileEventTitle) this.el.mobileEventTitle.textContent = focus.name;
     if (this.el.mobileEventBody) this.el.mobileEventBody.textContent = focus.description;
     if (this.el.mobileEventTag) this.el.mobileEventTag.textContent = focus.kind.toUpperCase();
+    if (this.el.eventBodyLong) this.renderLongDesc(this.el.eventBodyLong, focus.longDescription);
+    if (this.el.mobileEventBodyLong) this.renderLongDesc(this.el.mobileEventBodyLong, focus.longDescription);
 
     // Distance row label changes based on parent
     const parent = focus.parent ? getBody(focus.parent) : null;
@@ -765,6 +811,22 @@ export class HUD {
     // Mission mode
     this.renderMissionPanels();
     this.syncMissionTopButton();
+  }
+
+  private syncExpansion() {
+    if (this.el.eventBodyLong) this.el.eventBodyLong.hidden = !this.leftRailExpanded;
+    if (this.el.eventShowMore) this.el.eventShowMore.textContent = this.leftRailExpanded ? "Show less" : "Show more";
+    if (this.el.mobileEventBodyLong) this.el.mobileEventBodyLong.hidden = !this.mobileInfoExpanded;
+    if (this.el.mobileEventShowMore) this.el.mobileEventShowMore.textContent = this.mobileInfoExpanded ? "Show less" : "Show more";
+  }
+
+  private renderLongDesc(target: HTMLElement, paragraphs: string[]) {
+    target.innerHTML = "";
+    for (const p of paragraphs) {
+      const el = document.createElement("p");
+      el.textContent = p;
+      target.appendChild(el);
+    }
   }
 
   private renderBodyData(target: HTMLElement, focus: ReturnType<typeof getBody>) {
