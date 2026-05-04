@@ -215,7 +215,6 @@ export const BODIES: BodyData[] = [
       "Jupiter's visible atmosphere is a dynamic tapestry of alternating eastward and westward jet streams that create the familiar light and dark bands. The Great Red Spot — a persistent high-pressure anticyclonic storm — has been observed for at least 350 years and is wide enough to swallow the entire Earth, though it has been gradually shrinking in recent decades. Smaller storms, lightning strikes far more powerful than any on Earth, and aurora ovals hundreds of times more energetic than Earth's northern lights are ongoing features of Jupiter's turbulent atmosphere.",
       "Jupiter plays a crucial gravitational role as the solar system's largest planet, deflecting comets and asteroids that might otherwise threaten the inner planets — and occasionally directing them inward, as with the Shoemaker-Levy 9 comet that crashed into Jupiter in 1994. It has 95 confirmed moons — including the four large Galilean moons discovered by Galileo Galilei in 1610 — and a faint ring system. NASA's Juno spacecraft has been orbiting Jupiter since 2016, probing the planet's interior structure, magnetic field, and atmospheric dynamics in unprecedented detail.",
     ],
-    hasRings: true,
   },
   {
     id: "io",
